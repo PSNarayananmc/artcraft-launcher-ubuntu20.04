@@ -1,0 +1,157 @@
+name: Build Craft App Suite for Ubuntu 20.04 (glibc 2.31)
+
+# STAGED — move this file to .github/workflows/build.yml to activate
+# (the token used during the rebuild could not create files under .github/workflows/).
+#
+# Phase 1: builds the launcher + all 12 Craft Apps on a genuine glibc-2.31 base
+# (ubuntu-22.04 runner, container: ubuntu:20.04), one matrix job per app,
+# fail-fast: false. Phase 2 verification runs in the same jobs; a job FAILS if any
+# check fails. Each app produces an artifact `build-<id>` with the AppImage, .zsync,
+# verify/<id>.result.json and verify/<id>.verify.log.
+# The app list, pinned upstream tags and commits come from suite.json.
+
+on:
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'After building, publish the suite release (only PASS apps are released)'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  prepare:
+    name: Prepare matrix from suite.json
+    runs-on: ubuntu-22.04
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+      count: ${{ steps.gen.outputs.count }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - id: gen
+        run: |
+          set -euo pipefail
+          N=$(jq '.apps | length' suite.json)
+          echo "count=$N" >> "$GITHUB_OUTPUT"
+          # launcher + 12 apps = 13 matrix jobs
+          MATRIX=$(jq -c '{include: ([.launcher] + .apps | map({
+            id, repo, tag, commit, version, rust_version,
+            package: .cargo_package, gui: .gui_binary, cli: .cli_binary,
+            kind: (if .id == "artcraft-launcher" then "launcher" else "app" end)
+          })})' suite.json)
+          echo "matrix=$MATRIX" >> "$GITHUB_OUTPUT"
+          echo "matrix jobs: $((N + 1)) (launcher + $N apps)"
+
+  build:
+    name: build ${{ matrix.id }} ${{ matrix.tag }}
+    needs: prepare
+    runs-on: ubuntu-22.04
+    container:
+      image: ubuntu:20.04
+    env:
+      DEBIAN_FRONTEND: noninteractive
+      APPIMAGE_EXTRACT_AND_RUN: '1'
+      CARGO_INCREMENTAL: '0'
+      CARGO_TERM_COLOR: never
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
+    steps:
+      - name: Install system packages (git BEFORE actions/checkout)
+        run: |
+          set -eux
+          apt-get update -qq
+          apt-get install -y --no-install-recommends \
+            build-essential pkg-config libssl-dev libasound2-dev libvulkan-dev \
+            libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev \
+            libxcb1-dev libxrandr-dev libxi-dev libxcursor-dev libgtk-3-dev \
+            libgl1-mesa-dev libgl1-mesa-dri libegl-mesa0 libegl1 cmake git curl \
+            ca-certificates file desktop-file-utils squashfs-tools xz-utils \
+            python3 binutils wget zsync appstream jq xvfb xauth
+          git --version
+          ldd --version | head -1
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Clone upstream ${{ matrix.repo }} at pinned tag ${{ matrix.tag }}
+        run: |
+          set -eux
+          git clone --depth 1 --branch "${{ matrix.tag }}" \
+            "https://github.com/${{ matrix.repo }}.git" upstream
+          ACTUAL="$(git -C upstream rev-parse HEAD)"
+          echo "upstream HEAD: $ACTUAL"
+          echo "pinned commit : ${{ matrix.commit }}"
+          test "$ACTUAL" = "${{ matrix.commit }}" || {
+            echo "PIN MISMATCH: tag ${{ matrix.tag }} of ${{ matrix.repo }} moved"; exit 1; }
+
+      - name: Install Rust toolchain (stable >= repo's rust-version)
+        run: |
+          curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
+            | sh -s -- -y --profile minimal --default-toolchain stable
+          echo "$HOME/.cargo/bin" >> "$GITHUB_PATH"
+          "$HOME/.cargo/bin/rustc" --version
+          "$HOME/.cargo/bin/cargo" --version
+
+      - name: Build + package AppImage (upstream packaging script)
+        run: |
+          set -eux
+          cd upstream
+          bash packaging/linux/package.sh --formats appimage
+          ls -la dist/release/
+
+      - name: Phase 2 verification (glibc / ldd / smoke / sha256)
+        env:
+          GUI_BIN: ${{ matrix.gui }}
+          CLI_BIN: ${{ matrix.cli }}
+        run: |
+          set -eux
+          bash scripts/verify-appimage.sh "${{ matrix.id }}" upstream
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.id }}
+          path: |
+            upstream/dist/release/*.AppImage
+            upstream/dist/release/*.AppImage.zsync
+            verify/*.json
+            verify/*.log
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish suite release (PASS apps only)
+    needs: [prepare, build]
+    if: ${{ inputs.release }}
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          pattern: build-*
+      - name: Assemble and publish the release (never overwrites)
+        env:
+          GH_TOKEN: ${{ github.token }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+          RUN_ID: ${{ github.run_id }}
+          SUITE_JSON: suite.json
+        run: |
+          bash scripts/assemble-release.sh

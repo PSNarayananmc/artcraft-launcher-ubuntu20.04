@@ -1,0 +1,154 @@
+{
+  "suite": "Craft App Suite",
+  "recon": {
+    "date": "2026-10-11",
+    "source_of_truth": "storytold/craft-launcher @ v0.2.0, crates/core/src/catalog.rs (const SUITE: [CraftApp; 12])",
+    "app_count_found": 12,
+    "app_count_expected": 12,
+    "note": "Exactly 12 apps found (7 Classic + 5 New), exactly as the launcher's built-in catalog declares. The launcher itself is catalogued separately (const LAUNCHER, repo storytold/craft-launcher). All 13 projects are native Rust workspaces (egui/eframe GUI); none uses Tauri, Electron or Qt; none needs ffmpeg/gstreamer/onnxruntime (media codecs are in-house pure-Rust crates: mpeg2v, h264, hevc, matroska, heif, raw...)."
+  },
+  "launcher": {
+    "id": "artcraft-launcher",
+    "name": "ArtCraft Launcher",
+    "repo": "storytold/craft-launcher",
+    "tag": "v0.2.0",
+    "commit": "bd1182e75c3e631ce877f7317b54b8243e2b4742",
+    "version": "0.2.0",
+    "rust_version": "1.90",
+    "stack": "native-rust",
+    "cargo_package": "artcraft-launcher",
+    "gui_binary": "artcraft-launcher",
+    "cli_binary": "",
+    "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+    "appimage_basename": "artcraft-launcher-0.2.0-linux-x86_64.AppImage",
+    "system_libs": "build-essential pkg-config libssl-dev libasound2-dev libvulkan-dev libxkbcommon-dev libxkbcommon-x11-dev libwayland-dev libx11-dev libxcb1-dev libxrandr-dev libxi-dev libxcursor-dev libgtk-3-dev libgl1-mesa-dev",
+    "note": "crate artcraft-launcher-native lives in crates/native; app id ai.storyteller.artcraft-launcher; the suite repo already ships a v0.1.2 rebuild (release v0.1.2-ubuntu20.04, untouched)."
+  },
+  "apps": [
+    {
+      "id": "photocraft", "name": "PhotoCraft", "group": "Classic", "like": "Adobe Photoshop",
+      "repo": "storytold/photocraft", "tag": "v0.7.0", "commit": "79261615956ab21334e49ca1d384390272e647da",
+      "version": "0.7.0", "rust_version": "1.95", "stack": "native-rust",
+      "cargo_package": "photocraft", "gui_binary": "photocraft", "cli_binary": "photocraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "photocraft-0.7.0-linux-x86_64.AppImage",
+      "system_libs": "standard set (see build workflow); heif feature enabled by package.sh",
+      "note": "package.sh builds -p photocraft -p photocraft-cli --features heif"
+    },
+    {
+      "id": "vectorcraft", "name": "VectorCraft", "group": "Classic", "like": "Adobe Illustrator",
+      "repo": "storytold/vectorcraft", "tag": "v0.9.0", "commit": "10f1c56a861869936af0027cef14b1cf5d8cf515",
+      "version": "0.9.0", "rust_version": "1.95", "stack": "native-rust",
+      "cargo_package": "vectorcraft", "gui_binary": "vectorcraft", "cli_binary": "vectorcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "vectorcraft-0.9.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "filmcraft", "name": "FilmCraft", "group": "Classic", "like": "Adobe Premiere Pro",
+      "repo": "storytold/filmcraft", "tag": "v0.6.0", "commit": "2ff3f5e266838700c292a35aaf762e3d4dcef980",
+      "version": "0.6.0", "rust_version": "1.95", "stack": "native-rust",
+      "cargo_package": "filmcraft", "gui_binary": "filmcraft", "cli_binary": "filmcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "filmcraft-0.6.0-linux-x86_64.AppImage",
+      "system_libs": "standard set; no ffmpeg/gstreamer needed (codecs are in-house crates)",
+      "note": "Reference prebuilt AppImage from Google Drive is optional; build is from source. Desktop file ai.storyteller.filmcraft.desktop, icon assets/app-icon/hicolor."
+    },
+    {
+      "id": "lightcraft", "name": "LightCraft", "group": "Classic", "like": "Adobe Lightroom",
+      "repo": "storytold/lightcraft", "tag": "v0.6.0", "commit": "9e6c4c6fc9c7a7f192ce846c00ceb531e0f64dda",
+      "version": "0.6.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "lightcraft", "gui_binary": "lightcraft", "cli_binary": "lightcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "lightcraft-0.6.0-linux-x86_64.AppImage",
+      "system_libs": "standard set; heif feature enabled by package.sh",
+      "note": "package.sh builds with --features lightcraft/heif,lightcraft-cli/heif"
+    },
+    {
+      "id": "pdfcraft", "name": "PdfCraft", "group": "Classic", "like": "Adobe Acrobat",
+      "repo": "storytold/pdfcraft", "tag": "v0.6.0", "commit": "53a5880386789fc3531e54f6e6ffdef9a8e41f1a",
+      "version": "0.6.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "pdfcraft", "gui_binary": "pdfcraft", "cli_binary": "pdfcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "pdfcraft-0.6.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": "former asset stem printcraft (<=0.2.1); vendors its own winit"
+    },
+    {
+      "id": "effectcraft", "name": "EffectCraft", "group": "Classic", "like": "Adobe After Effects",
+      "repo": "storytold/effectcraft", "tag": "v0.8.0", "commit": "f953cd2855bf36beffa6a4d608e9bf4b226e9442",
+      "version": "0.8.0", "rust_version": "1.95", "stack": "native-rust",
+      "cargo_package": "effectcraft", "gui_binary": "effectcraft", "cli_binary": "effectcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "effectcraft-0.8.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "designcraft", "name": "DesignCraft", "group": "Classic", "like": "Adobe InDesign",
+      "repo": "storytold/designcraft", "tag": "v0.6.0", "commit": "a9124a0517594ce9872f73637e7b841a4967bcf9",
+      "version": "0.6.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "designcraft", "gui_binary": "designcraft", "cli_binary": "designcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "designcraft-0.6.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "wordcraft", "name": "WordCraft", "group": "New", "like": "Microsoft Word",
+      "repo": "storytold/wordcraft", "tag": "v0.5.0", "commit": "e4b7d155f15a7784197ba34eeea0b54490d70eb2",
+      "version": "0.5.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "wordcraft", "gui_binary": "wordcraft", "cli_binary": "wordcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "wordcraft-0.5.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "deckcraft", "name": "DeckCraft", "group": "New", "like": "Microsoft PowerPoint",
+      "repo": "storytold/deckcraft", "tag": "v0.5.0", "commit": "a98df49b21632d69a3da994d35df1ea91dab41af",
+      "version": "0.5.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "deckcraft", "gui_binary": "deckcraft", "cli_binary": "deckcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "deckcraft-0.5.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "gridcraft", "name": "GridCraft", "group": "New", "like": "Microsoft Excel",
+      "repo": "storytold/gridcraft", "tag": "v0.5.0", "commit": "9f896c1249f40d18bf182199dc03042959be5f3f",
+      "version": "0.5.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "gridcraft", "gui_binary": "gridcraft", "cli_binary": "gridcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "gridcraft-0.5.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": ""
+    },
+    {
+      "id": "cadcraft", "name": "CADCraft", "group": "New", "like": "Autodesk AutoCAD",
+      "repo": "storytold/cadcraft", "tag": "v0.5.0", "commit": "315751e3ec98e708bcc831dd7f80ca0433a2e3d0",
+      "version": "0.5.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "cadcraft", "gui_binary": "cadcraft", "cli_binary": "cadcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "cadcraft-0.5.0-linux-x86_64.AppImage",
+      "system_libs": "standard set",
+      "note": "no -web crate; gui+cli only"
+    },
+    {
+      "id": "soundcraft", "name": "SoundCraft", "group": "New", "like": "Avid Pro Tools",
+      "repo": "storytold/soundcraft", "tag": "v0.5.0", "commit": "4410486fc21561a9db0dc33961a2017469127e0d",
+      "version": "0.5.0", "rust_version": "1.90", "stack": "native-rust",
+      "cargo_package": "soundcraft", "gui_binary": "soundcraft", "cli_binary": "soundcraft-cli",
+      "build_cmd": "bash packaging/linux/package.sh --formats appimage",
+      "appimage_basename": "soundcraft-0.5.0-linux-x86_64.AppImage",
+      "system_libs": "standard set + libasound2-dev (ALSA via cpal)",
+      "note": ""
+    }
+  ],
+  "verification_targets": {
+    "max_glibc": "2.31",
+    "max_glibcxx": "3.4.28",
+    "method": "--appimage-extract + objdump -T over all ELF files; ldd must have no 'not found'; CLI --version/--help exit 0; GUI alive ~8s under xvfb-run"
+  }
+}
