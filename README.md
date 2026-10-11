@@ -14,7 +14,7 @@ see [`PATCHES.md`](PATCHES.md). App licences are MIT OR Apache-2.0 (upstream
 
 ## Downloads — one release with everything
 
-**[v0.2.0-suite-ubuntu20.04](https://github.com/PSNarayananmc/artcraft-launcher-ubuntu20.04/releases/tag/v0.2.0-suite-ubuntu20.04)**
+**[v0.2.0-suite-ubuntu20.04-r2](https://github.com/PSNarayananmc/artcraft-launcher-ubuntu20.04/releases/tag/v0.2.0-suite-ubuntu20.04-r2)**
 (pre-release) — 13 AppImages + `SHA256SUMS` + `verification.md`:
 
 | App | What it is | Version | Upstream | Asset |
@@ -34,7 +34,7 @@ see [`PATCHES.md`](PATCHES.md). App licences are MIT OR Apache-2.0 (upstream
 | SoundCraft | Recording, editing and mixing audio (Pro Tools-like) | 0.5.0 | [soundcraft](https://github.com/storytold/soundcraft) | `soundcraft-0.5.0-ubuntu20.04-x86_64.AppImage` |
 
 Direct asset URLs look like
-`https://github.com/PSNarayananmc/artcraft-launcher-ubuntu20.04/releases/download/v0.2.0-suite-ubuntu20.04/<asset>`.
+`https://github.com/PSNarayananmc/artcraft-launcher-ubuntu20.04/releases/download/v0.2.0-suite-ubuntu20.04-r2/<asset>`.
 Each AppImage also ships with a `.zsync` for AppImageUpdate delta updates.
 
 FilmCraft additionally has its own repo and release:
